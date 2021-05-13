@@ -11,9 +11,13 @@ class Game:
         # self.font = pygame.font.Font('Arial', 32)
         self.running = True
 
-    def createTilemap(self):
+        self.character_spritesheet = Spritesheet('img/character.png')
+        self.terrain_spritesheet = Spritesheet('img/Overworld.png')
+
+    def create_tilemap(self):
         for i, row in enumerate(TILEMAP):
             for j, column in enumerate(row):
+                Ground(self, j, i)
                 if column == 'B':
                     Block(self, j, i)
                 if column == 'P':
@@ -28,7 +32,7 @@ class Game:
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
 
-        self.createTilemap()
+        self.create_tilemap()
 
     def events(self):
         #game loop events
