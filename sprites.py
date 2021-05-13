@@ -89,8 +89,8 @@ class Player(Sprites):
             self.game.playing = False
 
     def collide_blocks(self, direction):
+        hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
         if direction == 'x':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.x_change > 0:
                     for sprites in self.game.all_sprites:
@@ -102,7 +102,6 @@ class Player(Sprites):
                     self.rect.x = hits[0].rect.right
 
         if direction == 'y':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.y_change > 0:
                     for sprites in self.game.all_sprites:
@@ -193,7 +192,7 @@ class Enemy(Sprites):
         self.movement_loop = 0
         self.max_travel = random.randint(7, 30)
 
-        self.image = self.game.enemy_spritesheet.get_sprite(4, 7, self.width, self.height)
+        self.image = self.game.enemy_spritesheet.get_sprite(4, 7, self.width-8, self.height)
         self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
@@ -201,7 +200,7 @@ class Enemy(Sprites):
         self.rect.y = self.y
 
     def update(self):
-        self.move_towards_player2(self.game.player)
+        self.move_towards_player(self.game.player)
         self.animate()
 
         self.rect.x += self.x_change
@@ -212,19 +211,20 @@ class Enemy(Sprites):
         self.x_change = 0
         self.y_change = 0
 
-    def move_towards_player2(self, player):
-        # Find direction vector (dx, dy) between enemy and player.
-        dirvect = pygame.math.Vector2(player.rect.x - self.rect.x,
-                                      player.rect.y - self.rect.y)
-        dirvect.normalize()
-        # Move along this normalized vector towards the player at current speed.
-        dirvect.scale_to_length(ENEMY_SPEED)
-        self.rect.move_ip(dirvect)
+    def move_towards_player(self, player):
+        if self.rect.x > player.rect.x:
+            self.x_change -= ENEMY_SPEED
+        elif self.rect.x < player.rect.x:
+            self.x_change += ENEMY_SPEED
+
+        if self.rect.y < player.rect.y:
+            self.y_change += ENEMY_SPEED
+        elif self.rect.y > player.rect.y:
+            self.y_change -= ENEMY_SPEED
 
     def collide_blocks(self, direction):
+        hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
         if direction == 'x':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
-            print(hits)
             if hits:
                 if self.x_change > 0:
                     self.rect.x = hits[0].rect.left - self.rect.width
@@ -232,12 +232,13 @@ class Enemy(Sprites):
                     self.rect.x = hits[0].rect.right
 
         if direction == 'y':
-            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.y_change > 0:
                     self.rect.y = hits[0].rect.top - self.rect.height
                 if self.y_change < 0:
                     self.rect.y = hits[0].rect.bottom
+
+
 
     def animate(self):
         down_animations = [
