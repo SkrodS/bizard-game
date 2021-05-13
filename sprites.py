@@ -192,7 +192,7 @@ class Enemy(Sprites):
         self.movement_loop = 0
         self.max_travel = random.randint(7, 30)
 
-        self.image = self.game.enemy_spritesheet.get_sprite(4, 7, self.width-8, self.height)
+        self.image = self.game.enemy_spritesheet.get_sprite(4, 7, self.width-4, self.height)
         self.image.set_colorkey(BLACK)
 
         self.rect = self.image.get_rect()
@@ -214,13 +214,17 @@ class Enemy(Sprites):
     def move_towards_player(self, player):
         if self.rect.x > player.rect.x:
             self.x_change -= ENEMY_SPEED
+            self.facing = 'left'
         elif self.rect.x < player.rect.x:
             self.x_change += ENEMY_SPEED
+            self.facing = 'right'
 
         if self.rect.y < player.rect.y:
             self.y_change += ENEMY_SPEED
+            self.facing = 'down'
         elif self.rect.y > player.rect.y:
             self.y_change -= ENEMY_SPEED
+            self.facing = 'up'
 
     def collide_blocks(self, direction):
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
@@ -242,17 +246,17 @@ class Enemy(Sprites):
 
     def animate(self):
         down_animations = [
-            self.game.enemy_spritesheet.get_sprite(1, 6, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(17, 7, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(33, 6, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(49, 7, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(4, 7, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(37, 8, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(68, 7, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(101, 8, self.width, self.height),
         ]
 
         up_animations = [
-            self.game.enemy_spritesheet.get_sprite(0, 69, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(16, 70, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(32, 69, self.width, self.height),
-            self.game.enemy_spritesheet.get_sprite(48, 70, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(7, 39, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(39, 40, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(71, 39, self.width, self.height),
+            self.game.enemy_spritesheet.get_sprite(104, 40, self.width, self.height),
         ]
 
         left_animations = [
