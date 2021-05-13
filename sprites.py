@@ -54,18 +54,26 @@ class Player(pygame.sprite.Sprite):
     def movement(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_s]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.y -= PLAYER_SPEED
             self.y_change += PLAYER_SPEED
             self.facing = 'down'
 
         if keys[pygame.K_w]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.y += PLAYER_SPEED
             self.y_change -= PLAYER_SPEED
             self.facing = 'up'
 
         if keys[pygame.K_a]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.x += PLAYER_SPEED
             self.x_change -= PLAYER_SPEED
             self.facing = 'left'
 
         if keys[pygame.K_d]:
+            for sprite in self.game.all_sprites:
+                sprite.rect.x -= PLAYER_SPEED
             self.x_change += PLAYER_SPEED
             self.facing = 'right'
 
@@ -80,16 +88,24 @@ class Player(pygame.sprite.Sprite):
             hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.x_change > 0:
+                    for sprites in self.game.all_sprites:
+                        sprites.rect.x += PLAYER_SPEED
                     self.rect.x = hits[0].rect.left - self.rect.width
                 if self.x_change < 0:
+                    for sprites in self.game.all_sprites:
+                        sprites.rect.x -= PLAYER_SPEED
                     self.rect.x = hits[0].rect.right
 
         if direction == 'y':
             hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
             if hits:
                 if self.y_change > 0:
+                    for sprites in self.game.all_sprites:
+                        sprites.rect.y += PLAYER_SPEED
                     self.rect.y = hits[0].rect.top - self.rect.height
                 if self.y_change < 0:
+                    for sprites in self.game.all_sprites:
+                        sprites.rect.y -= PLAYER_SPEED
                     self.rect.y = hits[0].rect.bottom
 
     def animate(self):
