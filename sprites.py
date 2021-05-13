@@ -36,6 +36,10 @@ class Player(Sprites):
         self.facing = 'down'
         self.animation_loop = 1
 
+        self.health = 3
+        self.collision_immune = False
+        self.collision_time = 0
+
         self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width-3, self.height)
 
         self.rect = self.image.get_rect()
@@ -84,7 +88,14 @@ class Player(Sprites):
 
     def collide_enemy(self):
         hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
-        if hits:
+        if pygame.time.get_ticks() - self.collision_time > 1000:
+            self.collision_immune = False
+        if hits and not self.collision_immune:
+            self.health -= 1
+            self.collision_immune = True
+            self.collision_time = pygame.time.get_ticks()
+            print(f'HP: {self.health}')
+        if self.health <= 0:
             self.kill()
             self.game.playing = False
 
@@ -187,10 +198,8 @@ class Enemy(Sprites):
         self.width = ENEMY_WIDTH
         self.height = ENEMY_HEIGHT
 
-        self.facing = random.choice(['left', 'right'])
+        self.facing = random.choice(['left', 'right', 'up', 'down'])
         self.animation_loop = 1
-        self.movement_loop = 0
-        self.max_travel = random.randint(7, 30)
 
         self.image = self.game.enemy_spritesheet.get_sprite(4, 7, self.width-4, self.height)
         self.image.set_colorkey(BLACK)
