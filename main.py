@@ -6,7 +6,7 @@ import sys
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
+        self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.SCALED)
         self.clock = pygame.time.Clock()
         self.running = True
 
@@ -21,7 +21,7 @@ class Game:
                 if column == 'B':
                     Block(self, j, i)
                 if column == 'P':
-                    Player(self, j, i)
+                    self.player = Player(self, j, i)
                 if column == 'E':
                     Enemy(self, j, i)
 
@@ -30,6 +30,7 @@ class Game:
         self.playing = True
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
+        self.players = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()

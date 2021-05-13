@@ -13,26 +13,30 @@ class Spritesheet:
         sprite.set_colorkey(BLACK)
         return sprite
 
-
-class Player(pygame.sprite.Sprite):
+class Sprites(pygame.sprite.Sprite):
     def __init__(self, game, x, y):
         self.game = game
-        self._layer = PLAYER_LAYER
-        self.groups = self.game.all_sprites
-        pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.width = PLAYER_WIDTH
-        self.height = PLAYER_HEIGHT
 
         self.x_change = 0
         self.y_change = 0
 
+class Player(Sprites):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self._layer = PLAYER_LAYER
+        self.groups = self.game.all_sprites, self.game.players
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = PLAYER_WIDTH
+        self.height = PLAYER_HEIGHT
+
         self.facing = 'down'
         self.animation_loop = 1
 
-        self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width, self.height)
+        self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width-3, self.height)
 
         self.rect = self.image.get_rect()
         self.rect.x = self.x
@@ -53,6 +57,7 @@ class Player(pygame.sprite.Sprite):
 
     def movement(self):
         keys = pygame.key.get_pressed()
+        
         if keys[pygame.K_s]:
             for sprite in self.game.all_sprites:
                 sprite.rect.y -= PLAYER_SPEED
@@ -173,20 +178,15 @@ class Player(pygame.sprite.Sprite):
                 if self.animation_loop >= 4:
                     self.animation_loop = 1
 
-class Enemy(pygame.sprite.Sprite):
+class Enemy(Sprites):
     def __init__(self, game, x, y):
-        self.game = game
+        super().__init__(game, x, y)
         self._layer = ENEMY_LAYER
         self.groups = self.game.all_sprites, self.game.enemies
         pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
         self.width = ENEMY_WIDTH
         self.height = ENEMY_HEIGHT
-
-        self.x_change = 0
-        self.y_change = 0
 
         self.facing = random.choice(['left', 'right'])
         self.animation_loop = 1
@@ -201,27 +201,43 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.y = self.y
 
     def update(self):
-        self.movement()
+        self.move_towards_player2(self.game.player)
         self.animate()
 
         self.rect.x += self.x_change
+        self.collide_blocks('x')
         self.rect.y += self.y_change
+        self.collide_blocks('y')
 
         self.x_change = 0
         self.y_change = 0
 
-    def movement(self):
-        if self.facing == 'left':
-            self.x_change -= ENEMY_SPEED
-            self.movement_loop -= 1
-            if self.movement_loop <= -self.max_travel:
-                self.facing = 'right'
+    def move_towards_player2(self, player):
+        # Find direction vector (dx, dy) between enemy and player.
+        dirvect = pygame.math.Vector2(player.rect.x - self.rect.x,
+                                      player.rect.y - self.rect.y)
+        dirvect.normalize()
+        # Move along this normalized vector towards the player at current speed.
+        dirvect.scale_to_length(ENEMY_SPEED)
+        self.rect.move_ip(dirvect)
 
-        if self.facing == 'right':
-            self.x_change += ENEMY_SPEED
-            self.movement_loop += 1
-            if self.movement_loop >= self.max_travel:
-                self.facing = 'left'
+    def collide_blocks(self, direction):
+        if direction == 'x':
+            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+            print(hits)
+            if hits:
+                if self.x_change > 0:
+                    self.rect.x = hits[0].rect.left - self.rect.width
+                if self.x_change < 0:
+                    self.rect.x = hits[0].rect.right
+
+        if direction == 'y':
+            hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+            if hits:
+                if self.y_change > 0:
+                    self.rect.y = hits[0].rect.top - self.rect.height
+                if self.y_change < 0:
+                    self.rect.y = hits[0].rect.bottom
 
     def animate(self):
         down_animations = [
@@ -289,15 +305,14 @@ class Enemy(pygame.sprite.Sprite):
                     self.animation_loop = 1
 
 
-class Block(pygame.sprite.Sprite):
+class Block(Sprites):
     def __init__(self, game, x, y):
-        self.game = game
+        super().__init__(game, x, y)
         self._layer = BLOCK_LAYER
         self.groups = self.game.all_sprites, self.game.blocks
         pygame.sprite.Sprite.__init__(self, self.groups)
+        
 
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
         self.width = TILESIZE
         self.height = TILESIZE
 
@@ -307,15 +322,13 @@ class Block(pygame.sprite.Sprite):
         self.rect.x = self.x
         self.rect.y = self.y
 
-class Ground(pygame.sprite.Sprite):
+class Ground(Sprites):
     def __init__(self, game, x, y):
-        self.game = game
+        super().__init__(game, x, y)
         self._layer = GROUND_LAYER
         self.groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
 
-        self.x = x * TILESIZE
-        self.y = y * TILESIZE
         self.width = TILESIZE
         self.height = TILESIZE
 
