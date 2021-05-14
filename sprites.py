@@ -188,6 +188,37 @@ class Player(Sprites):
                 if self.animation_loop >= 4:
                     self.animation_loop = 1
 
+class Item(Sprites):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self._layer = ITEM_LAYER
+        self.groups = self.game.all_sprites, self.game.items
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = ITEM_WIDTH*2
+        self.height = ITEM_HEIGHT*2
+
+        self.image = pygame.image.load('img/items.png')
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        print(self.rect)
+        self.rect.x = self.game.player.x-18
+        self.rect.y = self.game.player.y-10
+        self.rotate()
+
+    def rotate(self):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        rel_x, rel_y = mouse_x - self.rect.x, mouse_y - self.rect.y
+        angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
+
+        self.image = pygame.transform.rotate(pygame.image.load('img/items.png'), int(angle))
+        self.image.set_colorkey(BLACK)
+
 class Enemy(Sprites):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)

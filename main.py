@@ -13,15 +13,17 @@ class Game:
         self.character_spritesheet = Spritesheet('img/character.png')
         self.terrain_spritesheet = Spritesheet('img/Overworld.png')
         self.enemy_spritesheet = Spritesheet('img/log.png')
+        self.item_spritesheet = Spritesheet('img/items.png')
 
     def create_tilemap(self):
         for i, row in enumerate(TILEMAP):
-            for j, column in enumerate(row)
+            for j, column in enumerate(row):
                 Ground(self, j, i)
                 if column == 'B':
                     Block(self, j, i)
                 if column == 'P':
                     self.player = Player(self, j, i)
+                    Item(self, j, i)
                 if column == 'E':
                     Enemy(self, j, i)
 
@@ -31,6 +33,7 @@ class Game:
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
         self.players = pygame.sprite.LayeredUpdates()
+        self.items = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
