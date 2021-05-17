@@ -13,7 +13,7 @@ class Game:
         self.character_spritesheet = Spritesheet('img/character.png')
         self.terrain_spritesheet = Spritesheet('img/Overworld.png')
         self.enemy_spritesheet = Spritesheet('img/log.png')
-        self.item_spritesheet = Spritesheet('img/items.png')
+        self.bullet_spritesheet = Spritesheet('img/bullets.png')
 
     def create_tilemap(self):
         for i, row in enumerate(TILEMAP):
@@ -37,6 +37,7 @@ class Game:
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
+        self.bullets = pygame.sprite .LayeredUpdates()
 
         self.create_tilemap()
 

@@ -40,6 +40,9 @@ class Player(Sprites):
         self.collision_immune = False
         self.collision_time = 0
 
+        self.shoot_cooldown = False
+        self.shoot_time = 0
+
         self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width-3, self.height)
 
         self.rect = self.image.get_rect()
@@ -61,6 +64,15 @@ class Player(Sprites):
 
     def movement(self):
         keys = pygame.key.get_pressed()
+        mouse = pygame.mouse.get_pressed(num_buttons=3)
+
+        if pygame.time.get_ticks() - self.shoot_time > 300:
+            self.shoot_cooldown = False
+
+        if mouse[0] and not self.shoot_cooldown or keys[pygame.K_SPACE] and not self.shoot_cooldown:
+            self.shoot_time = pygame.time.get_ticks()
+            self.shoot_cooldown = True
+            Bullet(self.game, 0, 0)
         
         if keys[pygame.K_s]:
             for sprite in self.game.all_sprites:
@@ -87,18 +99,16 @@ class Player(Sprites):
             self.facing = 'right'
 
     def collide_enemy(self):
-        pass
-        # hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
-        # if pygame.time.get_ticks() - self.collision_time > 1000:
-        #     self.collision_immune = False
-        # if hits and not self.collision_immune:
-        #     self.health -= 1
-        #     self.collision_immune = True
-        #     self.collision_time = pygame.time.get_ticks()
-        #     print(f'HP: {self.health}')
-        # if self.health <= 0:
-        #     self.kill()
-        #     self.game.playing = False
+        hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        if pygame.time.get_ticks() - self.collision_time > 1000:
+            self.collision_immune = False
+        if hits and not self.collision_immune:
+            self.health -= 1
+            self.collision_immune = True
+            self.collision_time = pygame.time.get_ticks()
+        if self.health <= 0:
+            self.kill()
+            self.game.playing = False
 
     def collide_blocks(self, direction):
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
@@ -219,6 +229,66 @@ class Item(Sprites):
         self.rect.x = self.game.player.rect.centerx - int(image_copy.get_width() / 2)
         self.rect.y = self.game.player.rect.centery - int(image_copy.get_height() / 2)
 
+class Bullet(Sprites):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self._layer = ITEM_LAYER
+        self.groups = self.game.all_sprites, self.game.bullets
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = 15
+        self.height = 15
+
+        self.animation_loop = 0
+
+        self.image = self.game.bullet_spritesheet.get_sprite(107, 330, self.width, self.height)
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.game.player.rect.centerx
+        self.rect.y = self.game.player.rect.centery
+
+        mx, my = pygame.mouse.get_pos()
+        self.dir = (mx - self.rect.x, my - self.rect.y)
+
+        length = math.hypot(*self.dir)
+        if length == 0.0:
+            self.dir = (0, -1)
+        else:
+            self.dir = (self.dir[0]/length, self.dir[1]/length)
+
+    def update(self):
+        self.animate()
+        self.move()
+        self.collide()
+
+    def move(self):
+        self.rect.x = self.rect.x + self.dir[0] * 4
+        self.rect.y = self.rect.y + self.dir[1] * 4
+
+    def collide(self):
+        hits_blocks = pygame.sprite.spritecollide(self, self.game.blocks, False)
+        hits_enemies = pygame.sprite.spritecollide(self, self.game.enemies, False)
+
+        if hits_blocks:
+            self.kill()
+
+    def animate(self):
+        animations = [
+            self.game.bullet_spritesheet.get_sprite(107, 330, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(126, 330, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(145, 331, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(165, 329, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(183, 330, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(202, 330, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(221, 331, self.width, self.height),
+            self.game.bullet_spritesheet.get_sprite(241, 329, self.width, self.height),
+        ]
+        self.image = animations[math.floor(self.animation_loop)]
+        self.animation_loop += 0.2
+        if self.animation_loop >= 8:
+            self.animation_loop = 0
+
 class Enemy(Sprites):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
@@ -228,6 +298,10 @@ class Enemy(Sprites):
 
         self.width = ENEMY_WIDTH
         self.height = ENEMY_HEIGHT
+
+        self.health = 2
+        self.collision_immune = False
+        self.collision_time = 0
 
         self.facing = random.choice(['left', 'right', 'up', 'down'])
         self.animation_loop = 1
@@ -240,6 +314,7 @@ class Enemy(Sprites):
         self.rect.y = self.y
 
     def update(self):
+        self.collide_bullet()
         self.move_towards_player(self.game.player)
         self.animate()
 
@@ -282,7 +357,16 @@ class Enemy(Sprites):
                 if self.y_change < 0:
                     self.rect.y = hits[0].rect.bottom
 
-
+    def collide_bullet(self):
+        hits = pygame.sprite.spritecollide(self, self.game.bullets, True)
+        if pygame.time.get_ticks() - self.collision_time > 300:
+            self.collision_immune = False
+        if hits and not self.collision_immune:
+            self.health -= 1
+            self.collision_immune = True
+            self.collision_time = pygame.time.get_ticks()
+        if self.health <= 0:
+            self.kill()
 
     def animate(self):
         down_animations = [
