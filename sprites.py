@@ -37,6 +37,12 @@ class Player(Sprites):
         self.animation_loop = 1
 
         self.health = 3
+        self.target_health = 3
+        self.max_health = 3
+        self.health_bar_length = 100
+        self.health_ratio = self.max_health / self.health_bar_length
+        self.health_change_speed = 0.03
+
         self.collision_immune = False
         self.collision_time = 0
 
@@ -50,6 +56,7 @@ class Player(Sprites):
         self.rect.y = self.y
 
     def update(self):
+        self.health_bar()
         self.movement()
         self.animate()
         self.collide_enemy()
@@ -61,6 +68,29 @@ class Player(Sprites):
 
         self.x_change = 0
         self.y_change = 0
+
+
+    def health_bar(self):
+        transition_width = 0
+        transition_color = (255,0,0)
+
+        if self.health < self.target_health:
+            self.health += self.health_change_speed
+            transition_width = int((self.target_health - self.health) / self.health_ratio)
+            transition_color = GREEN
+
+        if self.health > self.target_health:
+            self.health -= self.health_change_speed 
+            transition_width = int((self.target_health - self.health) / self.health_ratio)
+            transition_color = YELLOW
+
+        health_bar_width = int(self.health / self.health_ratio)
+        health_bar = pygame.Rect(5,5,health_bar_width,6)
+        transition_bar = pygame.Rect(health_bar.right,5,transition_width,6)
+		
+        pygame.draw.rect(self.game.screen,RED,health_bar)
+        pygame.draw.rect(self.game.screen,WHITE,(5,5,self.health_bar_length,6),1)
+        pygame.draw.rect(self.game.screen,transition_color,transition_bar)	
 
     def movement(self):
         keys = pygame.key.get_pressed()
@@ -98,15 +128,22 @@ class Player(Sprites):
             self.x_change += PLAYER_SPEED
             self.facing = 'right'
 
+    def get_health(self, amount):
+        if self.target_health < self.max_health:
+            self.target_health += amount
+        if self.target_health > self.max_health:
+            self.target_health = self.max_health
+
     def collide_enemy(self):
         hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
         if pygame.time.get_ticks() - self.collision_time > 1000:
             self.collision_immune = False
         if hits and not self.collision_immune:
-            self.health -= 1
+            self.target_health -= 1
             self.collision_immune = True
             self.collision_time = pygame.time.get_ticks()
-        if self.health <= 0:
+            self.game.screen.fill(RED)
+        if self.target_health <= 0:
             self.kill()
             self.game.playing = False
 
@@ -268,7 +305,6 @@ class Bullet(Sprites):
 
     def collide(self):
         hits_blocks = pygame.sprite.spritecollide(self, self.game.blocks, False)
-        hits_enemies = pygame.sprite.spritecollide(self, self.game.enemies, False)
 
         if hits_blocks:
             self.kill()

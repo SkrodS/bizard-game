@@ -51,13 +51,13 @@ class Game:
     def update(self):
         #game loop updates
         self.all_sprites.update()
+        pygame.display.update()
 
     def draw(self):
         #game loop draw
         self.screen.fill(BLACK)
         self.all_sprites.draw(self.screen)
         self.clock.tick(FPS)
-        pygame.display.update()
 
     def main(self):
         #game loop
