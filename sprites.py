@@ -87,17 +87,18 @@ class Player(Sprites):
             self.facing = 'right'
 
     def collide_enemy(self):
-        hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
-        if pygame.time.get_ticks() - self.collision_time > 1000:
-            self.collision_immune = False
-        if hits and not self.collision_immune:
-            self.health -= 1
-            self.collision_immune = True
-            self.collision_time = pygame.time.get_ticks()
-            print(f'HP: {self.health}')
-        if self.health <= 0:
-            self.kill()
-            self.game.playing = False
+        pass
+        # hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
+        # if pygame.time.get_ticks() - self.collision_time > 1000:
+        #     self.collision_immune = False
+        # if hits and not self.collision_immune:
+        #     self.health -= 1
+        #     self.collision_immune = True
+        #     self.collision_time = pygame.time.get_ticks()
+        #     print(f'HP: {self.health}')
+        # if self.health <= 0:
+        #     self.kill()
+        #     self.game.playing = False
 
     def collide_blocks(self, direction):
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
@@ -206,18 +207,17 @@ class Item(Sprites):
         self.rect.y = self.y
 
     def update(self):
-        print(self.rect)
-        self.rect.x = self.game.player.x-18
-        self.rect.y = self.game.player.y-10
         self.rotate()
 
     def rotate(self):
         mouse_x, mouse_y = pygame.mouse.get_pos()
-        rel_x, rel_y = mouse_x - self.rect.x, mouse_y - self.rect.y
+        rel_x, rel_y = mouse_x - self.game.player.rect.centerx, mouse_y - self.game.player.rect.centery
         angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
 
-        self.image = pygame.transform.rotate(pygame.image.load('img/items.png'), int(angle))
-        self.image.set_colorkey(BLACK)
+        image_copy = pygame.transform.rotate(pygame.image.load('img/items.png'), int(angle)-135)
+        self.image = image_copy
+        self.rect.x = self.game.player.rect.centerx - int(image_copy.get_width() / 2)
+        self.rect.y = self.game.player.rect.centery - int(image_copy.get_height() / 2)
 
 class Enemy(Sprites):
     def __init__(self, game, x, y):
