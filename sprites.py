@@ -36,7 +36,7 @@ class Player(Sprites):
         self.facing = 'down'
         self.animation_loop = 1
 
-        self.health = 3
+        self.health = 0
         self.target_health = 3
         self.max_health = 3
         self.health_bar_length = 100
@@ -56,7 +56,7 @@ class Player(Sprites):
         self.rect.y = self.y
 
     def update(self):
-        self.health_bar()
+        self.get_health(0.0001)
         self.movement()
         self.animate()
         self.collide_enemy()
@@ -69,6 +69,7 @@ class Player(Sprites):
         self.x_change = 0
         self.y_change = 0
 
+        self.health_bar()
 
     def health_bar(self):
         transition_width = 0
@@ -88,9 +89,10 @@ class Player(Sprites):
         health_bar = pygame.Rect(5,5,health_bar_width,6)
         transition_bar = pygame.Rect(health_bar.right,5,transition_width,6)
 		
+        pygame.draw.rect(self.game.screen,BLACK,(5,5,self.health_bar_length,6))
         pygame.draw.rect(self.game.screen,RED,health_bar)
-        pygame.draw.rect(self.game.screen,WHITE,(5,5,self.health_bar_length,6),1)
         pygame.draw.rect(self.game.screen,transition_color,transition_bar)	
+        pygame.draw.rect(self.game.screen,WHITE,(5,5,self.health_bar_length,6),1)
 
     def movement(self):
         keys = pygame.key.get_pressed()
