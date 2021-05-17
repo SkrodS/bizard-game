@@ -36,7 +36,7 @@ class Player(Sprites):
         self.facing = 'down'
         self.animation_loop = 1
 
-        self.health = 0
+        self.health = 1
         self.target_health = 3
         self.max_health = 3
         self.health_bar_length = 100
@@ -56,7 +56,7 @@ class Player(Sprites):
         self.rect.y = self.y
 
     def update(self):
-        self.get_health(0.0001)
+        # self.get_health(0.0001)
         self.movement()
         self.animate()
         self.collide_enemy()
