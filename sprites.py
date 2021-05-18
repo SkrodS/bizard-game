@@ -275,6 +275,135 @@ class Player(Sprites):
                 if self.animation_loop >= 4:
                     self.animation_loop = 1
 
+class Bunny(Sprites):
+    def __init__(self, game, x, y):
+        super().__init__(game, x, y)
+        self._layer = ENEMY_LAYER
+        self.groups = self.game.all_sprites, self.game.bunnies
+        pygame.sprite.Sprite.__init__(self, self.groups)
+
+        self.width = 25
+        self.height = 27
+
+        self.animation_loop = 1
+
+        self.image = self.game.bunny_spritesheet.get_sprite(28, 218, 25, 27)
+        self.image.set_colorkey(BLACK)
+
+        self.rect = self.image.get_rect()
+        self.rect.x = self.x
+        self.rect.y = self.y
+
+    def update(self):
+        print(self.rect)
+        self.move_towards_player(self.game.player)
+        self.animate()
+
+        self.rect.x += self.x_change
+        self.collide_blocks('x')
+        self.rect.y += self.y_change
+        self.collide_blocks('y')
+
+        self.x_change = 0
+        self.y_change = 0
+
+    def move_towards_player(self, player):
+        if self.rect.x > player.rect.x:
+            self.x_change -= BUNNY_SPEED
+            self.facing = 'left'
+        elif self.rect.x < player.rect.x:
+            self.x_change += BUNNY_SPEED
+            self.facing = 'right'
+
+        if self.rect.y < player.rect.y:
+            self.y_change += BUNNY_SPEED
+            self.facing = 'down'
+        elif self.rect.y > player.rect.y:
+            self.y_change -= BUNNY_SPEED
+            self.facing = 'up'
+
+    def collide_blocks(self, direction):
+        hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+        if direction == 'x':
+            if hits:
+                if self.x_change > 0:
+                    self.rect.x = hits[0].rect.left - self.rect.width
+                if self.x_change < 0:
+                    self.rect.x = hits[0].rect.right
+
+        if direction == 'y':
+            if hits:
+                if self.y_change > 0:
+                    self.rect.y = hits[0].rect.top - self.rect.height
+                if self.y_change < 0:
+                    self.rect.y = hits[0].rect.bottom
+
+    def animate(self):
+        down_animations = [
+            self.game.bunny_spritesheet.get_sprite(37, 8, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(4, 7, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(68, 7, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(101, 8, self.width, self.height),
+        ]
+
+        up_animations = [
+            self.game.bunny_spritesheet.get_sprite(7, 39, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(39, 40, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(71, 39, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(104, 40, self.width, self.height),
+        ]
+
+        left_animations = [
+            self.game.bunny_spritesheet.get_sprite(10, 101, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(42, 102, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(74, 101, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(106, 102, self.width, self.height),
+        ]
+
+        right_animations = [
+            self.game.bunny_spritesheet.get_sprite(10, 69, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(42, 70, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(74, 69, self.width, self.height),
+            self.game.bunny_spritesheet.get_sprite(106, 70, self.width, self.height),
+        ]
+
+        if self.facing == 'down':
+            if self.y_change == 0:
+                self.image = self.game.bunny_spritesheet.get_sprite(1, 6, self.width, self.height)
+            else:
+                self.image = down_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 4:
+                    self.animation_loop = 1
+
+        if self.facing == 'up':
+            if self.y_change == 0:
+                self.image = self.game.bunny_spritesheet.get_sprite(0, 69, self.width, self.height)
+            else:
+                self.image = up_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 4:
+                    self.animation_loop = 1
+
+        if self.facing == 'left':
+            if self.x_change == 0:
+                self.image = self.game.bunny_spritesheet.get_sprite(10, 101, self.width, self.height)
+            else:
+                self.image = left_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 4:
+                    self.animation_loop = 1
+
+        if self.facing == 'right':
+            if self.x_change == 0:
+                self.image = self.game.bunny_spritesheet.get_sprite(10, 69, self.width, self.height)
+            else:
+                self.image = right_animations[math.floor(self.animation_loop)]
+                self.animation_loop += 0.1
+                if self.animation_loop >= 4:
+                    self.animation_loop = 1
+
+
 class Item(Sprites):
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
@@ -442,6 +571,7 @@ class Enemy(Sprites):
             self.collision_time = pygame.time.get_ticks()
         if self.health <= 0:
             self.game.player.bunny += 1
+            Bunny(self.game, 10, 10)
             self.kill()
 
     def animate(self):

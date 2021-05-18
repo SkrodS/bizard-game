@@ -19,7 +19,7 @@ class Game:
         self.enemy_spritesheet = Spritesheet('img/log.png')
         self.bullet_spritesheet = Spritesheet('img/bullets.png')
         self.object_spritesheet = Spritesheet('img/objects.png')
-        self.bunny_spritesheet = Spritesheet('img/bunnysheet5.png')
+        self.bunny_spritesheet = Spritesheet('img/bunny.png')
 
     def create_tilemap(self):
         for i, row in enumerate(TILEMAP):
@@ -44,6 +44,7 @@ class Game:
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
         self.bullets = pygame.sprite .LayeredUpdates()
+        self.bunnies = pygame.sprite.LayeredUpdates()
 
         self.create_tilemap()
 
