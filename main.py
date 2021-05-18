@@ -44,7 +44,6 @@ class Game:
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
         self.bullets = pygame.sprite .LayeredUpdates()
-        self.bunnies = pygame.sprite.LayeredUpdates()
 
         self.create_tilemap()
 
@@ -72,10 +71,21 @@ class Game:
             self.events()
             self.update()
             self.draw()
-        self.running = False
 
     def game_over(self):
-        pass
+        for sprite in self.all_sprites:
+            sprite.kill()
+        text = self.font.render('Game Over', False, RED)
+        text_rect = text.get_rect()
+        text_rect.x = WIN_WIDTH/2
+        text_rect.y = WIN_HEIGHT/2
+        self.screen.blit(text, text_rect)
+        pygame.display.update()
+        while self.running:
+            self.events()
+            self.update()
+            self.draw()
+
 
     def intro_screen(self):
         pass
