@@ -9,11 +9,17 @@ class Game:
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.SCALED)
         self.clock = pygame.time.Clock()
         self.running = True
+        
+        self.font = pygame.font.Font('font/rainyhearts.ttf', 16)
+
+        self.wave = 1
 
         self.character_spritesheet = Spritesheet('img/character.png')
         self.terrain_spritesheet = Spritesheet('img/Overworld.png')
         self.enemy_spritesheet = Spritesheet('img/log.png')
         self.bullet_spritesheet = Spritesheet('img/bullets.png')
+        self.object_spritesheet = Spritesheet('img/objects.png')
+        self.bunny_spritesheet = Spritesheet('img/bunnysheet5.png')
 
     def create_tilemap(self):
         for i, row in enumerate(TILEMAP):

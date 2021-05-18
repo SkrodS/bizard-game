@@ -49,6 +49,11 @@ class Player(Sprites):
         self.shoot_cooldown = False
         self.shoot_time = 0
 
+        self.heal_cooldown = False
+        self.heal_time = 0
+
+        self.bunny = 0
+
         self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width-3, self.height)
 
         self.rect = self.image.get_rect()
@@ -70,6 +75,8 @@ class Player(Sprites):
         self.y_change = 0
 
         self.health_bar()
+        self.display_bunny()
+
 
     def health_bar(self):
         transition_width = 0
@@ -86,17 +93,47 @@ class Player(Sprites):
             transition_color = YELLOW
 
         health_bar_width = int(self.health / self.health_ratio)
-        health_bar = pygame.Rect(5,5,health_bar_width,6)
-        transition_bar = pygame.Rect(health_bar.right,5,transition_width,6)
+        health_bar = pygame.Rect(5,13,health_bar_width,8)
+        transition_bar = pygame.Rect(health_bar.right,13,transition_width,8)
 		
-        pygame.draw.rect(self.game.screen,BLACK,(5,5,self.health_bar_length,6))
+        pygame.draw.rect(self.game.screen,BLACK,(0,0,WIN_WIDTH,24))
+        pygame.draw.rect(self.game.screen,BLACK,(5,13,self.health_bar_length,8))
         pygame.draw.rect(self.game.screen,RED,health_bar)
         pygame.draw.rect(self.game.screen,transition_color,transition_bar)	
-        pygame.draw.rect(self.game.screen,WHITE,(5,5,self.health_bar_length,6),1)
+        pygame.draw.rect(self.game.screen,WHITE,(5,13,self.health_bar_length,8),1)
+
+        text = self.game.font.render('Health', True, WHITE)
+        text_rect = text.get_rect()
+        text_rect.x = 8
+        self.game.screen.blit(text, text_rect)
+
+    def display_bunny(self):
+
+        text = self.game.font.render(f'x{self.bunny}', True, YELLOW)
+        text_rect = text.get_rect()
+        text_rect.x = WIN_WIDTH-17
+        text_rect.y = 7
+
+        bunny_image = pygame.transform.smoothscale(pygame.image.load('img/bunnysheet5.png').convert_alpha(), (20, 20))
+        bunny_rect = bunny_image.get_rect()
+        bunny_rect.x = WIN_WIDTH-40
+        bunny_rect.y = 2
+        self.game.screen.blit(text, text_rect)
+        self.game.screen.blit(bunny_image, bunny_rect)
 
     def movement(self):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed(num_buttons=3)
+
+        if pygame.time.get_ticks() - self.heal_time > 300:
+            self.heal_cooldown = False
+
+        if self.bunny > 0 and self.target_health != self.max_health:
+            if keys[pygame.K_LSHIFT] and not self.heal_cooldown or mouse[2] and not self.heal_cooldown:
+                self.heal_time = pygame.time.get_ticks()
+                self.heal_cooldown = True
+                self.bunny -= 1
+                self.get_health(0.5)
 
         if pygame.time.get_ticks() - self.shoot_time > 300:
             self.shoot_cooldown = False
@@ -404,6 +441,7 @@ class Enemy(Sprites):
             self.collision_immune = True
             self.collision_time = pygame.time.get_ticks()
         if self.health <= 0:
+            self.game.player.bunny += 1
             self.kill()
 
     def animate(self):
@@ -433,6 +471,13 @@ class Enemy(Sprites):
             self.game.enemy_spritesheet.get_sprite(42, 70, self.width, self.height),
             self.game.enemy_spritesheet.get_sprite(74, 69, self.width, self.height),
             self.game.enemy_spritesheet.get_sprite(106, 70, self.width, self.height),
+        ]
+
+        fire_animations = [
+            self.game.object_spritesheet.get_sprite(65, 49, 13, 15),
+            self.game.object_spritesheet.get_sprite(81, 49, 14, 15),
+            self.game.object_spritesheet.get_sprite(97, 50, 14, 14),
+            self.game.object_spritesheet.get_sprite(113, 49, 14, 15),
         ]
 
         if self.facing == 'down':
@@ -470,7 +515,14 @@ class Enemy(Sprites):
                 self.animation_loop += 0.1
                 if self.animation_loop >= 4:
                     self.animation_loop = 1
-
+        
+        if self.collision_immune:
+            self.x_change = 0
+            self.y_change = 0
+            self.image = fire_animations[math.floor(self.animation_loop)]
+            self.animation_loop += 0.1
+            if self.animation_loop >= 4:
+                self.animation_loop = 1
 
 class Block(Sprites):
     def __init__(self, game, x, y):
