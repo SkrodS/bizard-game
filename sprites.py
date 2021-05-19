@@ -1,5 +1,6 @@
 import pygame
 from config import *
+from gamestate import *
 import math
 import random
 
@@ -185,7 +186,7 @@ class Player(Sprites):
             self.facing = 'right'
 
         if keys[pygame.K_ESCAPE]:
-            self.game.playing = False
+            self.game.gamestate = Gamestate.PAUSED
 
     def get_health(self, amount):
         if self.target_health < self.max_health:
@@ -204,7 +205,7 @@ class Player(Sprites):
             self.game.screen.fill(RED)
         if self.target_health <= 0:
             self.kill()
-            self.game.playing = False
+            self.game.gamestate = Gamestate.GAME_OVER
 
     def collide_blocks(self, direction):
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
@@ -582,7 +583,7 @@ class Button(Sprites):
     def __init__(self, game, x, y, text, color1, color2, action):
         super().__init__(game, x, y)
         self._layer = MENU_LAYER
-        self.groups = self.game.menu
+        self.groups = self.game.menu, self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.text = text
@@ -608,8 +609,8 @@ class Button(Sprites):
         if self.rect.collidepoint(pygame.mouse.get_pos()):
             self.surface = self.game.font.render(self.text, False, self.color2)
             self.image = self.surface
-            if mouse[0]:
-                self.action()
+            if mouse[0] and pygame.time.get_ticks() - self.game.cooldown > 300:
+                self.game.gamestate = self.action
         else:
             self.surface = self.game.font.render(self.text, False, self.color1)
             self.image = self.surface
@@ -618,7 +619,7 @@ class Title(Sprites):
     def __init__(self, game, x, y, text, color):
         super().__init__(game, x, y)
         self._layer = MENU_LAYER
-        self.groups = self.game.menu
+        self.groups = self.game.menu, self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.text = text
