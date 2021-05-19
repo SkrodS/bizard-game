@@ -184,6 +184,9 @@ class Player(Sprites):
             self.x_change += PLAYER_SPEED
             self.facing = 'right'
 
+        if keys[pygame.K_ESCAPE]:
+            self.game.playing = False
+
     def get_health(self, amount):
         if self.target_health < self.max_health:
             self.target_health += amount
@@ -578,8 +581,8 @@ class Ground(Sprites):
 class Button(Sprites):
     def __init__(self, game, x, y, text, color1, color2, action):
         super().__init__(game, x, y)
-        self._layer = GROUND_LAYER
-        self.groups = self.game.all_sprites
+        self._layer = MENU_LAYER
+        self.groups = self.game.menu
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.text = text
@@ -588,7 +591,7 @@ class Button(Sprites):
 
         self.action = action
 
-        self.surface = self.game.font.render(self.text, True, self.color1)
+        self.surface = self.game.font.render(self.text, False, self.color1)
 
         self.rect = self.surface.get_rect()
         self.rect.centerx = x
@@ -603,19 +606,19 @@ class Button(Sprites):
         mouse = pygame.mouse.get_pressed(num_buttons=3)
 
         if self.rect.collidepoint(pygame.mouse.get_pos()):
-            self.surface = self.game.font.render(self.text, True, self.color2)
+            self.surface = self.game.font.render(self.text, False, self.color2)
             self.image = self.surface
             if mouse[0]:
                 self.action()
         else:
-            self.surface = self.game.font.render(self.text, True, self.color1)
+            self.surface = self.game.font.render(self.text, False, self.color1)
             self.image = self.surface
 
 class Title(Sprites):
     def __init__(self, game, x, y, text, color):
         super().__init__(game, x, y)
-        self._layer = GROUND_LAYER
-        self.groups = self.game.all_sprites
+        self._layer = MENU_LAYER
+        self.groups = self.game.menu
         pygame.sprite.Sprite.__init__(self, self.groups)
 
         self.text = text

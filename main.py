@@ -1,6 +1,8 @@
 import pygame
+from enum import Enum
 from sprites import *
 from config import *
+from gamestate import *
 import sys
 
 class Game:
@@ -44,7 +46,8 @@ class Game:
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
         self.attacks = pygame.sprite.LayeredUpdates()
-        self.bullets = pygame.sprite .LayeredUpdates()
+        self.bullets = pygame.sprite.LayeredUpdates()
+        self.menu = pygame.sprite.LayeredUpdates()
 
         self.create_tilemap()
 
@@ -72,6 +75,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+        self.pause_screen()
 
     def game_over(self):
         for sprite in self.all_sprites:
@@ -87,17 +91,40 @@ class Game:
             self.update()
             self.draw()
 
+    def pause_screen(self):
+        Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-40, 'Paused', BLUE)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'Continue', GREEN, YELLOW, self.intro_screen)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+15, 'Save progress', WHITE, YELLOW, print)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+30, 'Back to Menu', WHITE, YELLOW, print)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+45, 'Quit Game', RED, YELLOW, sys.exit)
 
+        while self.running:
+            self.events()
+            self.menu.update()
+            pygame.display.update()
+            self.screen.fill(BLACK)
+            self.menu.draw(self.screen)
+            self.clock.tick(FPS)
 
     def intro_screen(self):
         pass
 
 g = Game()
-g.intro_screen()
-g.new()
-while g.running:
-    g.main()
-    g.game_over()
+gamestate = Gamestate.MENU
 
-pygame.quit()
-sys.exit()
+while True:
+
+    if gamestate == Gamestate.MENU:
+        g.intro_screen()
+        gamestate = Gamestate.RUNNING
+    
+    elif gamestate == Gamestate.RUNNING:
+        g.new()
+        g.main()
+        gamestate = Gamestate.GAME_OVER
+
+    elif gamestate == Gamestate.GAME_OVER:
+        g.game_over()
+
+    elif gamestate == Gamestate.PAUSED:
+        g.pause_screen()
