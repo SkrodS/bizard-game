@@ -11,6 +11,7 @@ class Game:
         self.running = True
         
         self.font = pygame.font.Font('font/rainyhearts.ttf', 16)
+        self.font_big = pygame.font.Font('font/rainyhearts.ttf', 32)
 
         self.wave = 1
 
@@ -75,16 +76,17 @@ class Game:
     def game_over(self):
         for sprite in self.all_sprites:
             sprite.kill()
-        text = self.font.render('Game Over', False, RED)
-        text_rect = text.get_rect()
-        text_rect.x = WIN_WIDTH/2
-        text_rect.y = WIN_HEIGHT/2
-        self.screen.blit(text, text_rect)
-        pygame.display.update()
+        
+        Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-40, 'Game Over', RED)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'Try Again', WHITE, YELLOW, self.intro_screen)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+20, 'Quit Game', WHITE, YELLOW, sys.exit)
+
+
         while self.running:
             self.events()
             self.update()
             self.draw()
+
 
 
     def intro_screen(self):
