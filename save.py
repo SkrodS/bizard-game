@@ -25,8 +25,6 @@ def save(wave, difficulty):
 
     index = ''
 
-    print(data_encrypted)
-    print(date)
     while True:
         try:
             if not os.path.exists('save_files'):
