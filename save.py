@@ -12,7 +12,7 @@ def save(wave, difficulty):
     fernet = Fernet(Fernet.generate_key())
     data_encrypted = fernet.encrypt(data_string.encode())
 
-    date = datetime.today().strftime('%Y-%m-%d-%H:%M')
+    date = datetime.today().strftime('%Y-%m-%d-%H.%M')
 
     difficulty_string = ''
 
