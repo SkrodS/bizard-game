@@ -9,7 +9,6 @@ def save(wave, difficulty):
     data['wave'] = wave
     data_string = json.dumps(data).encode('UTF-8')
     hashed = bcrypt.hashpw(data_string, bcrypt.gensalt())
-    print(hashed)
     date = datetime.today().strftime('%Y-%m-%d-%H:%M')
 
     index = ''

@@ -1,6 +1,4 @@
-from enum import Enum
-
-class Gamestate(Enum):
+class Gamestate():
     MENU = 1
     RUNNING = 2
     NEXT_WAVE = 3
@@ -12,3 +10,4 @@ class Gamestate(Enum):
     MEDIUM = 9
     HARD = 10
     SAVE = 11
+    LOAD = 12
