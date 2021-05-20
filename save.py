@@ -30,7 +30,7 @@ def save(wave, difficulty):
             if not os.path.exists('save_files'):
                 os.makedirs('save_files')
             with open(f'save_files/{difficulty_string} wave {wave} ({date})'+index, 'x') as outfile:
-                print(data_encrypted, file=outfile)
+                outfile.write(str(data_encrypted))
             break
         except IOError:
             if index:
