@@ -1,13 +1,19 @@
 import json
 from datetime import datetime
 import os
+from cryptography.fernet import Fernet
 
 def save(wave, difficulty):
     data = {}
     data['difficulty'] = difficulty
     data['wave'] = wave
     data_string = json.dumps(data)
+
+    fernet = Fernet(Fernet.generate_key())
+    data_encrypted = fernet.encrypt(data_string.encode())
+
     date = datetime.today().strftime('%Y-%m-%d-%H:%M')
+
     difficulty_string = ''
 
     if difficulty == 2:
@@ -19,14 +25,14 @@ def save(wave, difficulty):
 
     index = ''
 
-    print(data_string)
+    print(data_encrypted)
     print(date)
     while True:
         try:
             if not os.path.exists('save_files'):
                 os.makedirs('save_files')
             with open(f'save_files/{difficulty_string} wave {wave} ({date})'+index, 'x') as outfile:
-                print(data_string, file=outfile)
+                print(data_encrypted, file=outfile)
             break
         except IOError:
             if index:
