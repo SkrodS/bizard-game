@@ -25,7 +25,7 @@ class Sprites(pygame.sprite.Sprite):
         self.y_change = 0
 
 class Player(Sprites):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, bunny):
         super().__init__(game, x, y)
         self._layer = PLAYER_LAYER
         self.groups = self.game.all_sprites, self.game.players
@@ -56,7 +56,7 @@ class Player(Sprites):
         self.kills = 0
         self.enemeis = len(self.game.enemies)
 
-        self.bunny = 0
+        self.bunny = bunny
 
         self.image = self.game.character_spritesheet.get_sprite(1, 6, self.width-3, self.height)
 
@@ -80,6 +80,8 @@ class Player(Sprites):
 
         self.health_bar()
         self.display_hud()
+
+        self.check_win()
 
     def health_bar(self):
         transition_width = 0
@@ -110,15 +112,22 @@ class Player(Sprites):
         text_rect.x = 8
         self.game.screen.blit(text, text_rect)
 
+    def check_win(self):
+        if self.kills == self.enemeis:
+            self.target_health = self.max_health
+            self.game.bunny = self.bunny
+            self.collision_immune = True
+            self.game.gamestate = Gamestate.NEXT_WAVE
+
     def display_hud(self):
-        text = self.game.font.render(f'x{self.bunny}', True, YELLOW)
+        text = self.game.font.render(f'x{self.bunny}', False, YELLOW)
         text_rect = text.get_rect()
-        text_rect.x = WIN_WIDTH-17
+        text_rect.x = WIN_WIDTH-27
         text_rect.y = 7
 
         bunny_image = pygame.transform.smoothscale(pygame.image.load('img/bunnysheet5.png').convert_alpha(), (20, 20))
         bunny_rect = bunny_image.get_rect()
-        bunny_rect.x = WIN_WIDTH-40
+        bunny_rect.x = WIN_WIDTH-50
         bunny_rect.y = 2
 
         if self.enemeis < len(self.game.enemies):
@@ -126,14 +135,20 @@ class Player(Sprites):
 
         enemies_image = pygame.image.load('img/log_still.png').convert_alpha()
         enemies_rect = enemies_image.get_rect()
-        enemies_rect.x = (WIN_WIDTH/2)-10
+        enemies_rect.x = (WIN_WIDTH/2)+30
         enemies_rect.y = 3
 
-        text_enemies = self.game.font.render(f'{self.kills}/{self.enemeis}', True, YELLOW)
+        text_enemies = self.game.font.render(f'{self.kills}/{self.enemeis}', False, YELLOW)
         text_enemies_rect = text_enemies.get_rect()
-        text_enemies_rect.x = (WIN_WIDTH/2)+12
+        text_enemies_rect.x = (WIN_WIDTH/2)+52
         text_enemies_rect.y = 7
+
+        text_wave = self.game.font.render(f'Wave: {self.game.wave}', False, PURPLE)
+        text_wave_rect = text_wave.get_rect()
+        text_wave_rect.x = (WIN_WIDTH/2-40)
+        text_wave_rect.y = 7
         
+        self.game.screen.blit(text_wave, text_wave_rect)
         self.game.screen.blit(text, text_rect)
         self.game.screen.blit(bunny_image, bunny_rect)
         self.game.screen.blit(text_enemies, text_enemies_rect)
@@ -395,7 +410,7 @@ class Enemy(Sprites):
         self.width = ENEMY_WIDTH
         self.height = ENEMY_HEIGHT
 
-        self.health = 2
+        self.health = self.game.difficulty
         self.collision_immune = False
         self.collision_time = 0
 

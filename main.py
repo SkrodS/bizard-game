@@ -2,6 +2,7 @@ import pygame
 from enum import Enum
 from sprites import *
 from config import *
+from save import save
 from gamestate import *
 import sys
 
@@ -15,8 +16,12 @@ class Game:
         self.font = pygame.font.Font('font/rainyhearts.ttf', 16)
         self.font_big = pygame.font.Font('font/rainyhearts.ttf', 32)
 
+        self.bunny = 0
+
         self.gamestate = Gamestate.MENU
         self.wave = 1
+        self.saved = False
+        self.difficulty = 0
         self.cooldown = 0
 
         self.character_spritesheet = Spritesheet('img/character.png')
@@ -27,24 +32,57 @@ class Game:
         self.bunny_spritesheet = Spritesheet('img/bunny.png')
 
     def create_tilemap(self):
-        for i, row in enumerate(TILEMAP):
+        enemies = 0
+        tilemap = [
+            'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+            'B......................................B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.-------...BB------------------------.B',
+            'B.------B.....---------BBBB---B-------.B',
+            'B.------B.P...----------------BB------.B',
+            'B.-----BB.....------------------------.B',
+            'B.-------.....--BBBBBB----------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.-------BBB-----------------BBBB-----.B',
+            'B.------------------------------------.B',
+            'B.-----------------BBB-------------B--.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.------B---------------------BB------.B',
+            'B.-----BB-----------------------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.------------------------------------.B',
+            'B.-------BBB-----------------BBBB-----.B',
+            'B.------------------------------------.B',
+            'B.------------BBB------------------B--.B',
+            'B.------------------------------------.B',
+            'B......................................B',
+            'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+        ]
+        while True:
+            target_row = random.randint(0,len(tilemap)-1)
+            target_column = random.randint(0,len(tilemap[target_row])-1)
+            if tilemap[target_row][target_column] == '-':
+                tilemap[target_row] = tilemap[target_row][:target_column] + 'E' + tilemap[target_row][target_column+1:]
+                enemies += 1
+            if enemies == self.wave+2:
+                break
+        for i, row in enumerate(tilemap):
             for j, column in enumerate(row):
                 Ground(self, j, i)
                 if column == 'B':
                     Block(self, j, i)
                 if column == 'P':
-                    self.player = Player(self, j, i)
+                    self.player = Player(self, j, i, self.bunny)
                     Item(self, j, i)
-                if column == '-':
-                    if len(self.enemies) != self.wave+2:
-                        possible = [
-                            'enemy',*(self.wave+2),
-                            'ground',*(412-self.wave+2),
-                        ]
-                        print(possible)
-                        choice = random.choice(possible)
-                        if choice == 'enemy':
-                            Enemy(self, j, i)
+                if column == 'E':
+                    Enemy(self, j, i)
 
     def new(self):
         # ett nytt spel startar
@@ -107,11 +145,22 @@ class Game:
 
     def pause_screen(self):
         self.cooldown = pygame.time.get_ticks()
-        Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-40, 'Paused', BLUE)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'Continue', GREEN, YELLOW, Gamestate.RUNNING)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+15, 'Save progress', WHITE, YELLOW, print)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+30, 'Back to Menu', WHITE, YELLOW, Gamestate.MENU)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+45, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
+        Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-30, 'Paused', BLUE)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+10, 'Continue', GREEN, YELLOW, Gamestate.RUNNING)
+        if not self.saved:
+            Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+25, 'Save progress', WHITE, YELLOW, Gamestate.SAVE)
+        elif self.saved:
+            Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+25, 'Save progress', GRAY, GRAY, Gamestate.PAUSED)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+40, 'Back to Menu', WHITE, YELLOW, Gamestate.MENU)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+55, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
+        if self.difficulty == 2:
+            Button(self, WIN_WIDTH/2, 10, f'Difficulty: EASY', GREEN, GREEN, Gamestate.PAUSED)
+        if self.difficulty == 4:
+            Button(self, WIN_WIDTH/2, 10, f'Difficulty: MEDIUM', ORANGE, ORANGE, Gamestate.PAUSED)
+        if self.difficulty == 6:
+            Button(self, WIN_WIDTH/2, 10, f'Difficulty: HARD', RED, RED, Gamestate.PAUSED)
+        Button(self, WIN_WIDTH/2, 25, f'Wave: {self.wave}', PURPLE, PURPLE, Gamestate.PAUSED)
+            
 
         while self.gamestate == Gamestate.PAUSED:
             self.events()
@@ -126,13 +175,32 @@ class Game:
 
     def menu_screen(self):
         self.cooldown = pygame.time.get_ticks()
+        self.wave = 1
+        self.bunny = 0
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-60, 'Bizard:', PURPLE)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2-45, 'The Bunny-loving Wizard', BLUE, BLUE, Gamestate.MENU)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'PLAY', GREEN, YELLOW, Gamestate.RUNNING)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'PLAY', GREEN, YELLOW, Gamestate.DIFFICULTY_SELECTION)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+15, 'LOAD', WHITE, YELLOW, Gamestate.MENU)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+45, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
 
         while self.gamestate == Gamestate.MENU:
+            self.events()
+            self.menu.update()
+            pygame.display.update()
+            self.screen.fill(BLACK)
+            self.menu.draw(self.screen)
+            self.clock.tick(FPS)
+        
+        for sprite in self.menu:
+            sprite.kill()
+
+    def difficulty_selection_screen(self):
+        self.cooldown = pygame.time.get_ticks()
+        Button(self, WIN_WIDTH/2-60, WIN_HEIGHT/2, 'EASY', GREEN, YELLOW, Gamestate.EASY)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'MEDIUM', ORANGE, YELLOW, Gamestate.MEDIUM)
+        Button(self, WIN_WIDTH/2+60, WIN_HEIGHT/2, 'HARD', RED, YELLOW, Gamestate.HARD)
+
+        while self.gamestate == Gamestate.DIFFICULTY_SELECTION:
             self.events()
             self.menu.update()
             pygame.display.update()
@@ -153,13 +221,46 @@ while g.running:
         g.menu_screen()
 
     elif g.gamestate == Gamestate.RUNNING:
+        g.saved = False
         g.main()
+
+    elif g.gamestate == Gamestate.NEXT_WAVE:
+        g.wave += 1
+        for sprite in g.all_sprites:
+            if sprite:
+                sprite.kill()
+        g.new()
+        g.gamestate = Gamestate.RUNNING
 
     elif g.gamestate == Gamestate.PAUSED:
         g.pause_screen()
 
     elif g.gamestate == Gamestate.GAME_OVER:
+        g.wave = 0
         g.game_over()
 
     elif g.gamestate == Gamestate.EXIT:
         sys.exit()
+    
+    elif g.gamestate == Gamestate.DIFFICULTY_SELECTION:
+        g.difficulty_selection_screen()
+
+    elif g.gamestate == Gamestate.EASY:
+        g.difficulty = 2
+        g.new()
+        g.gamestate = Gamestate.RUNNING
+
+    elif g.gamestate == Gamestate.MEDIUM:
+        g.difficulty = 4
+        g.new()
+        g.gamestate = Gamestate.RUNNING
+
+    elif g.gamestate == Gamestate.HARD:
+        g.difficulty = 6
+        g.new()
+        g.gamestate = Gamestate.RUNNING
+
+    elif g.gamestate == Gamestate.SAVE:
+        save(g.wave, g.difficulty)
+        g.saved = True
+        g.gamestate = Gamestate.PAUSED
