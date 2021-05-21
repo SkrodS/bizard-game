@@ -4,6 +4,9 @@ from datetime import datetime
 import os
 
 def save(wave, difficulty, bunny):
+    '''
+    Spara en spelomgång
+    '''
     data = {}
     data['wave'] = wave
     data['difficulty'] = difficulty

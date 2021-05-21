@@ -78,7 +78,7 @@ class Player(Sprite):
 
     def update(self):
         '''
-        Kör dem Player()-funktioner som ska köras varje tick
+        Kör Player()-funktionerna som ska köras varje tick
         '''
         self.movement()
         self.animate()
@@ -184,9 +184,9 @@ class Player(Sprite):
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed(num_buttons=3)
 
+        # Kontroller för att heal:a sig
         if pygame.time.get_ticks() - self.__heal_time > 300:
             self.__heal_cooldown = False
-
         if self.bunny > 0 and self.__target_health != self.__max_health:
             if keys[pygame.K_LSHIFT] and not self.__heal_cooldown or mouse[2] and not self.__heal_cooldown:
                 self.__heal_time = pygame.time.get_ticks()
@@ -194,38 +194,37 @@ class Player(Sprite):
                 self.bunny -= 1
                 self.get_health(0.5)
 
+        # Kontroller för att skjuta
         if pygame.time.get_ticks() - self.__shoot_time > 300:
             self.__shoot_cooldown = False
-
         if mouse[0] and not self.__shoot_cooldown or keys[pygame.K_SPACE] and not self.__shoot_cooldown:
             self.__shoot_time = pygame.time.get_ticks()
             self.__shoot_cooldown = True
             Bullet(self.game, 0, 0)
         
+        # Kontroller för att röra sig
         if keys[pygame.K_s]:
             for sprite in self.game.all_sprites:
                 sprite.rect.y -= PLAYER_SPEED
             self.y_change += PLAYER_SPEED
             self.__facing = 'down'
-
         if keys[pygame.K_w]:
             for sprite in self.game.all_sprites:
                 sprite.rect.y += PLAYER_SPEED
             self.y_change -= PLAYER_SPEED
             self.__facing = 'up'
-
         if keys[pygame.K_a]:
             for sprite in self.game.all_sprites:
                 sprite.rect.x += PLAYER_SPEED
             self.x_change -= PLAYER_SPEED
             self.__facing = 'left'
-
         if keys[pygame.K_d]:
             for sprite in self.game.all_sprites:
                 sprite.rect.x -= PLAYER_SPEED
             self.x_change += PLAYER_SPEED
             self.__facing = 'right'
 
+        # Kontroller för att pausa
         if keys[pygame.K_ESCAPE]:
             self.game.gamestate = Gamestate.PAUSED
 
@@ -235,6 +234,7 @@ class Player(Sprite):
         '''
         if self.__target_health < self.__max_health:
             self.__target_health += amount
+
         if self.__target_health > self.__max_health:
             self.__target_health = self.__max_health
 
@@ -243,22 +243,26 @@ class Player(Sprite):
         Kollar om spelaren kolliderar med en fiende och delar ut skada om det händer
         '''
         hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
+
         if pygame.time.get_ticks() - self.__collision_time > 1000:
             self.__collision_immune = False
+
         if hits and not self.__collision_immune:
             self.__target_health -= 1
             self.__collision_immune = True
             self.__collision_time = pygame.time.get_ticks()
             self.game.screen.fill(RED)
+
         if self.__target_health <= 0:
             self.kill()
             self.game.gamestate = Gamestate.GAME_OVER
 
     def collide_blocks(self, direction):
         '''
-        Kollar om spelaren kolliderar med ett block
+        Kollar om spelaren kolliderar med ett block och stannar spelaren om det sker
         '''
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
+
         if direction == 'x':
             if hits:
                 if self.x_change > 0:
@@ -414,6 +418,7 @@ class Bullet(Sprite):
         self.__dir = (mx - self.rect.x, my - self.rect.y)
 
         length = math.hypot(*self.__dir)
+
         if length == 0.0:
             self.__dir = (0, -1)
         else:
@@ -457,8 +462,10 @@ class Bullet(Sprite):
             self.game.bullet_spritesheet.get_sprite(221, 331, self.__width, self.__height),
             self.game.bullet_spritesheet.get_sprite(241, 329, self.__width, self.__height),
         ]
+
         self.image = animations[math.floor(self.__animation_loop)]
         self.__animation_loop += 0.2
+
         if self.__animation_loop >= 8:
             self.__animation_loop = 0
 
@@ -525,7 +532,7 @@ class Enemy(Sprite):
 
     def collide_blocks(self, direction):
         '''
-        Kollar om fienden kolliderar med ett block
+        Kollar om fienden kolliderar med ett block och stoppar fienden om det sker
         '''
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
         if direction == 'x':
@@ -547,12 +554,15 @@ class Enemy(Sprite):
         Kollar om fienden kolliderar med ett skott och raderar fienden om det sker
         '''
         hits = pygame.sprite.spritecollide(self, self.game.bullets, True)
+
         if pygame.time.get_ticks() - self.__collision_time > 300:
             self.__collision_immune = False
+
         if hits and not self.__collision_immune:
             self.__health -= 1
             self.__collision_immune = True
             self.__collision_time = pygame.time.get_ticks()
+
         if self.__health <= 0:
             self.game.player.bunny += 1
             self.game.player.kills += 1
@@ -651,7 +661,6 @@ class Block(Sprite):
         self.__groups = self.game.all_sprites, self.game.blocks
         pygame.sprite.Sprite.__init__(self, self.__groups)
         
-
         self.__width = TILESIZE
         self.__height = TILESIZE
 
@@ -706,7 +715,7 @@ class Button(Sprite):
 
     def update(self):
         '''
-        Kör alla Button()-funktioner som ska köras tick
+        Kör alla Button()-funktioner som ska varje tick
         '''
         self.hover()
 

@@ -144,6 +144,7 @@ class Game:
             sprite.kill()
 
         self.cooldown = pygame.time.get_ticks()
+        
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-40, 'Game Over', RED)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'Back to Meny', WHITE, YELLOW, Gamestate.MENU)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+20, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
@@ -164,25 +165,26 @@ class Game:
         Visar "paus-skärmen" medan gamestate == Gamestate.PAUSED
         '''
         self.cooldown = pygame.time.get_ticks()
+
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-30, 'Paused', BLUE)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+10, 'Continue', GREEN, YELLOW, Gamestate.RUNNING)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+40, 'Back to Menu', WHITE, YELLOW, Gamestate.MENU)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+55, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
+        Button(self, WIN_WIDTH/2, 25, f'Wave: {self.wave}', PURPLE, PURPLE, Gamestate.PAUSED)
 
         if not self.saved:
             Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+25, 'Save progress', WHITE, YELLOW, Gamestate.SAVE)
         elif self.saved:
             Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+25, 'Save progress', GRAY, GRAY, Gamestate.PAUSED)
 
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+40, 'Back to Menu', WHITE, YELLOW, Gamestate.MENU)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+55, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
-        if self.difficulty == 2:
 
+        if self.difficulty == 2:
             Button(self, WIN_WIDTH/2, 10, f'Difficulty: EASY', GREEN, GREEN, Gamestate.PAUSED)
         if self.difficulty == 4:
             Button(self, WIN_WIDTH/2, 10, f'Difficulty: MEDIUM', ORANGE, ORANGE, Gamestate.PAUSED)
         if self.difficulty == 6:
             Button(self, WIN_WIDTH/2, 10, f'Difficulty: HARD', RED, RED, Gamestate.PAUSED)
             
-        Button(self, WIN_WIDTH/2, 25, f'Wave: {self.wave}', PURPLE, PURPLE, Gamestate.PAUSED)
             
 
         while self.gamestate == Gamestate.PAUSED:
