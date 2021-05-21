@@ -1,3 +1,4 @@
+from gamestate import *
 import tkinter as tk
 from tkinter import filedialog
 import base64
@@ -9,6 +10,8 @@ def load():
 
 
     filepath = filedialog.askopenfile(initialdir='save_files')
+    if not filepath:
+        return 0, 0, Gamestate.MENU
 
     with open(filepath.name, 'r') as f:
         data = f.read()
@@ -16,4 +19,4 @@ def load():
         data = data.replace("'", '"')
         data = json.loads(data)
 
-    return data['wave'], data['difficulty']
+    return data['wave'], data['difficulty'], Gamestate.RUNNING

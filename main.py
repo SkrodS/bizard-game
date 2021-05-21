@@ -60,7 +60,5 @@ while g.running:
         g.gamestate = Gamestate.PAUSED
 
     elif g.gamestate == Gamestate.LOAD:
-        # load()
-        g.wave, g.difficulty = load()
+        g.wave, g.difficulty, g.gamestate = load()
         g.new()
-        g.gamestate = Gamestate.RUNNING
