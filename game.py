@@ -8,7 +8,6 @@ class Game:
         pygame.init()
         self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.SCALED)
         self.clock = pygame.time.Clock()
-        self.running = True
         
         self.font = pygame.font.Font('font/rainyhearts.ttf', 16)
         self.font_big = pygame.font.Font('font/rainyhearts.ttf', 32)
@@ -29,6 +28,9 @@ class Game:
         self.bunny_spritesheet = Spritesheet('img/bunny.png')
 
     def create_tilemap(self):
+        '''
+        Skapar spelets tilemap
+        '''
         enemies = 0
         tilemap = [
             'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
@@ -63,6 +65,7 @@ class Game:
             'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
         ]
 
+        # Placerar ett antal fiender på slumpmässigt ställe av tilemap:en. Antal beror på wave.
         while True:
             target_row = random.randint(0,len(tilemap)-1)
             target_column = random.randint(0,len(tilemap[target_row])-1)
@@ -72,6 +75,7 @@ class Game:
             if enemies == self.wave+2:
                 break
 
+        # Genererar sprites baserat på tilemap:en
         for i, row in enumerate(tilemap):
             for j, column in enumerate(row):
                 Ground(self, j, i)
@@ -84,7 +88,9 @@ class Game:
                     Enemy(self, j, i)
 
     def new(self):
-        # ett nytt spel startar
+        """
+        Skapar allt som behövs för en ny spelomgång (Sprite-grupper och tilemap)
+        """
         self.playing = True
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
@@ -99,30 +105,41 @@ class Game:
         self.create_tilemap()
 
     def events(self):
-        #game loop events
+        '''
+        Kollar om spelaren klickar på stäng av
+        '''
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.gamestate = Gamestate.EXIT
 
     def update(self):
-        #game loop updates
+        '''
+        Uppdaterar alla sprites och skärmen
+        '''
         self.all_sprites.update()
         pygame.display.update()
 
     def draw(self):
-        #game loop draw
+        '''
+        Ritar alla sprites på skärmen
+        '''
         self.screen.fill(BLACK)
         self.all_sprites.draw(self.screen)
         self.clock.tick(FPS)
 
     def main(self):
-        #game loop
+        '''
+        Kör spelets gameplay medan gamestate == Gamestate.RUNNING
+        '''
         while self.gamestate == Gamestate.RUNNING:
             self.events()
             self.update()
             self.draw()
 
     def game_over(self):
+        '''
+        Dödar alla sprites och visar "Game Over-skärmen" medan gamestate == Gamestate.GAME_OVER
+        '''
         for sprite in self.all_sprites:
             sprite.kill()
 
@@ -143,6 +160,9 @@ class Game:
             sprite.kill()
 
     def pause_screen(self):
+        '''
+        Visar "paus-skärmen" medan gamestate == Gamestate.PAUSED
+        '''
         self.cooldown = pygame.time.get_ticks()
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-30, 'Paused', BLUE)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+10, 'Continue', GREEN, YELLOW, Gamestate.RUNNING)
@@ -177,6 +197,9 @@ class Game:
             sprite.kill()
 
     def menu_screen(self):
+        '''
+        Visar "meny-skärmen" medan gamestate == Gamestate.MENU
+        '''
         self.cooldown = pygame.time.get_ticks()
         self.wave = 1
         self.bunny = 0
@@ -198,6 +221,9 @@ class Game:
             sprite.kill()
 
     def difficulty_selection_screen(self):
+        '''
+        Visar "svårighetsgrads-skärmen" medan Gamestate == Gamestate.DIFFICULTY_SELECTION
+        '''
         self.cooldown = pygame.time.get_ticks()
         Button(self, WIN_WIDTH/2-60, WIN_HEIGHT/2, 'EASY', GREEN, YELLOW, Gamestate.EASY)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'MEDIUM', ORANGE, YELLOW, Gamestate.MEDIUM)

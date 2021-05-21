@@ -6,10 +6,12 @@ from game import *
 from cryptography.fernet import Fernet
 import sys
 
-g = Game()
+g = Game() # Skapar en instans av klassen spel. Detta är själva spelet.
 
-while g.running:
+while True:
     
+    # Nedan följer spelets "state machine".
+
     if g.gamestate == Gamestate.MENU:
         g.new()
         g.menu_screen()
@@ -55,10 +57,10 @@ while g.running:
         g.gamestate = Gamestate.RUNNING
 
     elif g.gamestate == Gamestate.SAVE:
-        save(g.wave, g.difficulty)
+        save(g.wave, g.difficulty, g.player.bunny)
         g.saved = True
         g.gamestate = Gamestate.PAUSED
 
     elif g.gamestate == Gamestate.LOAD:
-        g.wave, g.difficulty, g.gamestate = load()
+        g.wave, g.difficulty, g.bunny, g.gamestate = load()
         g.new()

@@ -3,10 +3,11 @@ import base64
 from datetime import datetime
 import os
 
-def save(wave, difficulty):
+def save(wave, difficulty, bunny):
     data = {}
     data['wave'] = wave
     data['difficulty'] = difficulty
+    data['bunny'] = bunny
 
     data_obscured = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
 

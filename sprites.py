@@ -5,16 +5,25 @@ import math
 import random
 
 class Spritesheet:
+    '''
+    En bild med flera sprites
+    '''
     def __init__(self, file):
         self.__sheet = pygame.image.load(file).convert()
 
     def get_sprite(self, x, y, width, height):
+        '''
+        Hämtar sprite (bild) från ett spritesheet
+        '''
         sprite = pygame.Surface([width, height])
         sprite.blit(self.__sheet, (0,0), (x, y, width, height))
         sprite.set_colorkey(BLACK)
         return sprite
 
-class Sprites(pygame.sprite.Sprite):
+class Sprite(pygame.sprite.Sprite):
+    '''
+    En sprites som ärver från pygame.sprite.Sprite
+    '''
     def __init__(self, game, x, y):
         self.game = game
 
@@ -24,7 +33,10 @@ class Sprites(pygame.sprite.Sprite):
         self.x_change = 0
         self.y_change = 0
 
-class Player(Sprites):
+class Player(Sprite):
+    '''
+    Spelarens karaktär. Innehåller alla scores samt HUD:en. Ärver från Sprite()
+    '''
     def __init__(self, game, x, y, bunny):
         super().__init__(game, x, y)
         self._layer = PLAYER_LAYER
@@ -65,7 +77,9 @@ class Player(Sprites):
         self.rect.y = self.y
 
     def update(self):
-        # self.__get_health(0.0001)
+        '''
+        Kör dem Player()-funktioner som ska köras varje tick
+        '''
         self.movement()
         self.animate()
         self.collide_enemy()
@@ -84,6 +98,9 @@ class Player(Sprites):
         self.check_win()
 
     def health_bar(self):
+        '''
+        Ritar HP-indikatorn på skärmen
+        '''
         transition_width = 0
         transition_color = (255,0,0)
 
@@ -113,6 +130,9 @@ class Player(Sprites):
         self.game.screen.blit(text, text_rect)
 
     def check_win(self):
+        '''
+        Kollar om alla fiender är döda
+        '''
         if self.kills == self.__enemeis:
             self.__target_health = self.__max_health
             self.game.bunny = self.bunny
@@ -120,6 +140,9 @@ class Player(Sprites):
             self.game.gamestate = Gamestate.NEXT_WAVE
 
     def display_hud(self):
+        '''
+        Ritar HUD:en
+        '''
         text = self.game.font.render(f'x{self.bunny}', False, YELLOW)
         text_rect = text.get_rect()
         text_rect.x = WIN_WIDTH-27
@@ -155,6 +178,9 @@ class Player(Sprites):
         self.game.screen.blit(enemies_image, enemies_rect)
 
     def movement(self):
+        '''
+        Kontrollerar spelaren (rörelse(W,A,S,D), avfyra skott(L_MOUSE eller SPACE), paus(ESCAPE), använda en kanin(R_MOUSE eller L_SHIFT))
+        '''
         keys = pygame.key.get_pressed()
         mouse = pygame.mouse.get_pressed(num_buttons=3)
 
@@ -204,12 +230,18 @@ class Player(Sprites):
             self.game.gamestate = Gamestate.PAUSED
 
     def get_health(self, amount):
+        '''
+        Ger spelaren liv
+        '''
         if self.__target_health < self.__max_health:
             self.__target_health += amount
         if self.__target_health > self.__max_health:
             self.__target_health = self.__max_health
 
     def collide_enemy(self):
+        '''
+        Kollar om spelaren kolliderar med en fiende och delar ut skada om det händer
+        '''
         hits = pygame.sprite.spritecollide(self, self.game.enemies, False)
         if pygame.time.get_ticks() - self.__collision_time > 1000:
             self.__collision_immune = False
@@ -223,6 +255,9 @@ class Player(Sprites):
             self.game.gamestate = Gamestate.GAME_OVER
 
     def collide_blocks(self, direction):
+        '''
+        Kollar om spelaren kolliderar med ett block
+        '''
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
         if direction == 'x':
             if hits:
@@ -247,6 +282,9 @@ class Player(Sprites):
                     self.rect.y = hits[0].rect.bottom
 
     def animate(self):
+        '''
+        Animerar spelarens sprite
+        '''
         down_animations = [
             self.game.character_spritesheet.get_sprite(1, 6, self.__width, self.__height),
             self.game.character_spritesheet.get_sprite(17, 7, self.__width, self.__height),
@@ -311,7 +349,10 @@ class Player(Sprites):
                 if self.__animation_loop >= 4:
                     self.__animation_loop = 1
 
-class Item(Sprites):
+class Item(Sprite):
+    '''
+    Spelarens trollstav
+    '''
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self._layer = ITEM_LAYER
@@ -329,9 +370,15 @@ class Item(Sprites):
         self.rect.y = self.y
 
     def update(self):
+        '''
+        Kör alla item()-funktioner som ska köras varje tick
+        '''
         self.rotate()
 
     def rotate(self):
+        '''
+        Roterar item så att den pekar mot musen
+        '''
         mouse_x, mouse_y = pygame.mouse.get_pos()
         rel_x, rel_y = mouse_x - self.game.player.rect.centerx, mouse_y - self.game.player.rect.centery
         angle = (180 / math.pi) * -math.atan2(rel_y, rel_x)
@@ -341,7 +388,10 @@ class Item(Sprites):
         self.rect.x = self.game.player.rect.centerx - int(image_copy.get_width() / 2)
         self.rect.y = self.game.player.rect.centery - int(image_copy.get_height() / 2)
 
-class Bullet(Sprites):
+class Bullet(Sprite):
+    '''
+    Skott
+    '''
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self._layer = ITEM_LAYER
@@ -370,21 +420,33 @@ class Bullet(Sprites):
             self.__dir = (self.__dir[0]/length, self.__dir[1]/length)
 
     def update(self):
+        '''
+        Kör alla Bullet()-funktioner som ska köras varje tick
+        '''
         self.animate()
         self.move()
         self.collide()
 
     def move(self):
+        '''
+        Rör skottet i musens riktning i förhållande till mitten av player
+        '''
         self.rect.x = self.rect.x + self.__dir[0] * 4
         self.rect.y = self.rect.y + self.__dir[1] * 4
 
     def collide(self):
+        '''
+        Kollar om skottet kolliderar med ett block och raderar skottet om det sker
+        '''
         hits_blocks = pygame.sprite.spritecollide(self, self.game.blocks, False)
 
         if hits_blocks:
             self.kill()
 
     def animate(self):
+        '''
+        Animerar skottet sprite
+        '''
         animations = [
             self.game.bullet_spritesheet.get_sprite(107, 330, self.__width, self.__height),
             self.game.bullet_spritesheet.get_sprite(126, 330, self.__width, self.__height),
@@ -400,7 +462,10 @@ class Bullet(Sprites):
         if self.__animation_loop >= 8:
             self.__animation_loop = 0
 
-class Enemy(Sprites):
+class Enemy(Sprite):
+    '''
+    Fiende
+    '''
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self._layer = ENEMY_LAYER
@@ -425,6 +490,9 @@ class Enemy(Sprites):
         self.rect.y = self.y
 
     def update(self):
+        '''
+        Kör alla Enemy()-funktioner som ska köras varje tick
+        '''
         self.collide_bullet()
         self.move_towards_player(self.game.player)
         self.animate()
@@ -438,6 +506,9 @@ class Enemy(Sprites):
         self.y_change = 0
 
     def move_towards_player(self, player):
+        '''
+        Rör fienden mot spelaren
+        '''
         if self.rect.x > player.rect.x:
             self.x_change -= ENEMY_SPEED
             self.__facing = 'left'
@@ -453,6 +524,9 @@ class Enemy(Sprites):
             self.__facing = 'up'
 
     def collide_blocks(self, direction):
+        '''
+        Kollar om fienden kolliderar med ett block
+        '''
         hits = pygame.sprite.spritecollide(self, self.game.blocks, False)
         if direction == 'x':
             if hits:
@@ -469,6 +543,9 @@ class Enemy(Sprites):
                     self.rect.y = hits[0].rect.bottom
 
     def collide_bullet(self):
+        '''
+        Kollar om fienden kolliderar med ett skott och raderar fienden om det sker
+        '''
         hits = pygame.sprite.spritecollide(self, self.game.bullets, True)
         if pygame.time.get_ticks() - self.__collision_time > 300:
             self.__collision_immune = False
@@ -482,6 +559,9 @@ class Enemy(Sprites):
             self.kill()
 
     def animate(self):
+        '''
+        Animerar fiendens sprite
+        '''
         down_animations = [
             self.game.enemy_spritesheet.get_sprite(4, 7, self.__width, self.__height),
             self.game.enemy_spritesheet.get_sprite(37, 8, self.__width, self.__height),
@@ -561,7 +641,10 @@ class Enemy(Sprites):
             if self.__animation_loop >= 4:
                 self.__animation_loop = 1
 
-class Block(Sprites):
+class Block(Sprite):
+    '''
+    Block-tile
+    '''
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self._layer = BLOCK_LAYER
@@ -578,7 +661,10 @@ class Block(Sprites):
         self.rect.x = self.x
         self.rect.y = self.y
 
-class Ground(Sprites):
+class Ground(Sprite):
+    '''
+    Ground-tile
+    '''
     def __init__(self, game, x, y):
         super().__init__(game, x, y)
         self._layer = GROUND_LAYER
@@ -594,7 +680,10 @@ class Ground(Sprites):
         self.rect.x = self.x
         self.rect.y = self.y
 
-class Button(Sprites):
+class Button(Sprite):
+    '''
+    Knapp
+    '''
     def __init__(self, game, x, y, text, color1, color2, action):
         super().__init__(game, x, y)
         self._layer = MENU_LAYER
@@ -616,9 +705,15 @@ class Button(Sprites):
         self.image = self.__surface
 
     def update(self):
+        '''
+        Kör alla Button()-funktioner som ska köras tick
+        '''
         self.hover()
 
     def hover(self):
+        '''
+        Kollar om musen är på knappen och om knappen klickas på
+        '''
         mouse = pygame.mouse.get_pressed(num_buttons=3)
 
         if self.rect.collidepoint(pygame.mouse.get_pos()):
@@ -630,7 +725,10 @@ class Button(Sprites):
             self.__surface = self.game.font.render(self.__text, False, self.__color1)
             self.image = self.__surface
 
-class Title(Sprites):
+class Title(Sprite):
+    '''
+    Stor text
+    '''
     def __init__(self, game, x, y, text, color):
         super().__init__(game, x, y)
         self._layer = MENU_LAYER

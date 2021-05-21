@@ -19,4 +19,4 @@ def load():
         data = data.replace("'", '"')
         data = json.loads(data)
 
-    return data['wave'], data['difficulty'], Gamestate.RUNNING
+    return data['wave'], data['difficulty'], data['bunny'], Gamestate.RUNNING
