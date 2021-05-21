@@ -1,16 +1,14 @@
 import json
+import base64
 from datetime import datetime
 import os
-from cryptography.fernet import Fernet
 
 def save(wave, difficulty):
     data = {}
-    data['difficulty'] = difficulty
     data['wave'] = wave
-    data_string = json.dumps(data)
+    data['difficulty'] = difficulty
 
-    fernet = Fernet(Fernet.generate_key())
-    data_encrypted = fernet.encrypt(data_string.encode())
+    data_obscured = base64.b64encode(str(data).encode('utf-8')).decode('utf-8')
 
     date = datetime.today().strftime('%Y-%m-%d-%H.%M')
 
@@ -29,8 +27,8 @@ def save(wave, difficulty):
         try:
             if not os.path.exists('save_files'):
                 os.makedirs('save_files')
-            with open(f'save_files/{difficulty_string} wave {wave} ({date})'+index, 'x') as outfile:
-                outfile.write(str(data_encrypted))
+            with open(f'save_files/{difficulty_string} wave {wave} ({date})'+index, 'x') as f:
+                f.write(str(data_obscured))
             break
         except IOError:
             if index:

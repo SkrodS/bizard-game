@@ -1,7 +1,9 @@
 import pygame
 from save import save
+from load import load
 from gamestate import *
 from game import *
+from cryptography.fernet import Fernet
 import sys
 
 g = Game()
@@ -56,3 +58,9 @@ while g.running:
         save(g.wave, g.difficulty)
         g.saved = True
         g.gamestate = Gamestate.PAUSED
+
+    elif g.gamestate == Gamestate.LOAD:
+        # load()
+        g.wave, g.difficulty = load()
+        g.new()
+        g.gamestate = Gamestate.RUNNING

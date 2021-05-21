@@ -183,7 +183,7 @@ class Game:
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-60, 'Bizard:', PURPLE)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2-45, 'The Bunny-loving Wizard', BLUE, BLUE, Gamestate.MENU)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'PLAY', GREEN, YELLOW, Gamestate.DIFFICULTY_SELECTION)
-        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+15, 'LOAD', WHITE, YELLOW, Gamestate.MENU)
+        Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+15, 'LOAD', WHITE, YELLOW, Gamestate.LOAD)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+45, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
 
         while self.gamestate == Gamestate.MENU:
