@@ -14,6 +14,7 @@ while True:
 
     # MENY
     if g.gamestate == Gamestate.MENU:
+        g.menu_music()
         g.new()
         g.menu_screen()
 
@@ -37,6 +38,7 @@ while True:
 
     # GAME OVER
     elif g.gamestate == Gamestate.GAME_OVER:
+        g.game_over_music()
         g.wave = 0
         g.game_over()
 
@@ -50,18 +52,21 @@ while True:
 
     # NY SPELOMGÅNG (EASY)
     elif g.gamestate == Gamestate.EASY:
+        g.gameplay_music()
         g.difficulty = 2
         g.new()
         g.gamestate = Gamestate.RUNNING
 
     # NY SPELOMGÅNG (MEDIUM)
     elif g.gamestate == Gamestate.MEDIUM:
+        g.gameplay_music()
         g.difficulty = 4
         g.new()
         g.gamestate = Gamestate.RUNNING
 
     # NY SPELOMGÅNG (HARD)
     elif g.gamestate == Gamestate.HARD:
+        g.gameplay_music()
         g.difficulty = 6
         g.new()
         g.gamestate = Gamestate.RUNNING
@@ -75,4 +80,5 @@ while True:
     # LADDA EN SPARAD SPELOMGÅNG
     elif g.gamestate == Gamestate.LOAD:
         g.wave, g.difficulty, g.bunny, g.gamestate = load()
+        g.gameplay_music()
         g.new()

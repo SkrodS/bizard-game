@@ -137,6 +137,7 @@ class Player(Sprite):
             self.__target_health = self.__max_health
             self.game.bunny = self.bunny
             self.__collision_immune = True
+            pygame.mixer.Sound('music/535840__evretro__8-bit-mini-win-sound-effect.wav').play()
             self.game.gamestate = Gamestate.NEXT_WAVE
 
     def display_hud(self):
@@ -188,7 +189,8 @@ class Player(Sprite):
         if pygame.time.get_ticks() - self.__heal_time > 300:
             self.__heal_cooldown = False
         if self.bunny > 0 and self.__target_health != self.__max_health:
-            if keys[pygame.K_LSHIFT] and not self.__heal_cooldown or mouse[2] and not self.__heal_cooldown:
+            if keys[pygame.K_LSHIFT] and not self.__heal_cooldown or mouse[2] and not self.__heal_cooldown:                
+                pygame.mixer.Sound('music/270304__littlerobotsoundfactory__collect-point-00.wav').play()
                 self.__heal_time = pygame.time.get_ticks()
                 self.__heal_cooldown = True
                 self.bunny -= 1
@@ -198,6 +200,7 @@ class Player(Sprite):
         if pygame.time.get_ticks() - self.__shoot_time > 300:
             self.__shoot_cooldown = False
         if mouse[0] and not self.__shoot_cooldown or keys[pygame.K_SPACE] and not self.__shoot_cooldown:
+            pygame.mixer.Sound('music/270343__littlerobotsoundfactory__shoot-01.wav').play()
             self.__shoot_time = pygame.time.get_ticks()
             self.__shoot_cooldown = True
             Bullet(self.game, 0, 0)
@@ -248,6 +251,7 @@ class Player(Sprite):
             self.__collision_immune = False
 
         if hits and not self.__collision_immune:
+            pygame.mixer.Sound('music/170635__swedger__fami-crash.wav').play()
             self.__target_health -= 1
             self.__collision_immune = True
             self.__collision_time = pygame.time.get_ticks()
@@ -446,6 +450,7 @@ class Bullet(Sprite):
         hits_blocks = pygame.sprite.spritecollide(self, self.game.blocks, False)
 
         if hits_blocks:
+            pygame.mixer.Sound('music/270338__littlerobotsoundfactory__open-01.wav').play()
             self.kill()
 
     def animate(self):
@@ -559,6 +564,7 @@ class Enemy(Sprite):
             self.__collision_immune = False
 
         if hits and not self.__collision_immune:
+            pygame.mixer.Sound('music/270338__littlerobotsoundfactory__open-01.wav').play()
             self.__health -= 1
             self.__collision_immune = True
             self.__collision_time = pygame.time.get_ticks()
@@ -729,6 +735,7 @@ class Button(Sprite):
             self.__surface = self.game.font.render(self.__text, False, self.__color2)
             self.image = self.__surface
             if mouse[0] and pygame.time.get_ticks() - self.game.cooldown > 300:
+                pygame.mixer.Sound('music/270315__littlerobotsoundfactory__menu-navigate-03.wav').play()
                 self.game.gamestate = self.__action
         else:
             self.__surface = self.game.font.render(self.__text, False, self.__color1)

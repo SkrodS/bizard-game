@@ -6,7 +6,7 @@ from gamestate import *
 class Game:
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.SCALED)
+        self.screen = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT), pygame.SCALED | pygame.RESIZABLE)
         self.clock = pygame.time.Clock()
         
         self.font = pygame.font.Font('font/rainyhearts.ttf', 16)
@@ -131,6 +131,7 @@ class Game:
         '''
         Kör spelets gameplay medan gamestate == Gamestate.RUNNING
         '''
+
         while self.gamestate == Gamestate.RUNNING:
             self.events()
             self.update()
@@ -144,7 +145,7 @@ class Game:
             sprite.kill()
 
         self.cooldown = pygame.time.get_ticks()
-        
+
         Title(self, WIN_WIDTH/2, WIN_HEIGHT/2-40, 'Game Over', RED)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2, 'Back to Meny', WHITE, YELLOW, Gamestate.MENU)
         Button(self, WIN_WIDTH/2, WIN_HEIGHT/2+20, 'Quit Game', RED, YELLOW, Gamestate.EXIT)
@@ -241,3 +242,24 @@ class Game:
         
         for sprite in self.menu:
             sprite.kill()
+
+    def menu_music(self):
+        '''
+        Spelar meny musiken
+        '''
+        pygame.mixer.stop()
+        pygame.mixer.Sound('music/MP_Menu_4.wav').play(-1, 0, 500)
+
+    def gameplay_music(self):
+        '''
+        Spelar gameplay musiken
+        '''
+        pygame.mixer.stop()
+        pygame.mixer.Sound('music/251461__joshuaempyre__arcade-music-loop.wav').play(-1, 0, 500)
+
+    def game_over_music(self):
+        '''
+        Spelar game over musiken
+        '''
+        pygame.mixer.stop()
+        pygame.mixer.Sound('music/270329__littlerobotsoundfactory__jingle-lose-00.wav').play(0, 0, 500)
