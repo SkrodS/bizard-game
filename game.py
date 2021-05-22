@@ -25,7 +25,6 @@ class Game:
         self.enemy_spritesheet = Spritesheet('img/log.png')
         self.bullet_spritesheet = Spritesheet('img/bullets.png')
         self.object_spritesheet = Spritesheet('img/objects.png')
-        self.bunny_spritesheet = Spritesheet('img/bunny.png')
 
     def create_tilemap(self):
         '''
@@ -94,11 +93,9 @@ class Game:
         self.playing = True
 
         self.all_sprites = pygame.sprite.LayeredUpdates()
-        self.players = pygame.sprite.LayeredUpdates()
         self.items = pygame.sprite.LayeredUpdates()
         self.blocks = pygame.sprite.LayeredUpdates()
         self.enemies = pygame.sprite.LayeredUpdates()
-        self.attacks = pygame.sprite.LayeredUpdates()
         self.bullets = pygame.sprite.LayeredUpdates()
         self.menu = pygame.sprite.LayeredUpdates()
 

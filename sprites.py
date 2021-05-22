@@ -40,7 +40,7 @@ class Player(Sprite):
     def __init__(self, game, x, y, bunny):
         super().__init__(game, x, y)
         self._layer = PLAYER_LAYER
-        self.__groups = self.game.all_sprites, self.game.players
+        self.__groups = self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.__groups)
 
         self.__width = PLAYER_WIDTH
