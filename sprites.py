@@ -699,19 +699,19 @@ class Button(Sprite):
     '''
     Knapp
     '''
-    def __init__(self, game, x, y, text, color1, color2, action):
+    def __init__(self, game, x, y, text, color, hover_color, action):
         super().__init__(game, x, y)
         self._layer = MENU_LAYER
         self.__groups = self.game.menu, self.game.all_sprites
         pygame.sprite.Sprite.__init__(self, self.__groups)
 
         self.__text = text
-        self.__color1 = color1
-        self.__color2 = color2
+        self.__color = color
+        self.__hover_color = hover_color
 
         self.__action = action
 
-        self.__surface = self.game.font.render(self.__text, False, self.__color1)
+        self.__surface = self.game.font.render(self.__text, False, self.__color)
 
         self.rect = self.__surface.get_rect()
         self.rect.centerx = x
@@ -732,13 +732,13 @@ class Button(Sprite):
         mouse = pygame.mouse.get_pressed(num_buttons=3)
 
         if self.rect.collidepoint(pygame.mouse.get_pos()):
-            self.__surface = self.game.font.render(self.__text, False, self.__color2)
+            self.__surface = self.game.font.render(self.__text, False, self.__hover_color)
             self.image = self.__surface
             if mouse[0] and pygame.time.get_ticks() - self.game.cooldown > 300:
                 pygame.mixer.Sound('music/270315__littlerobotsoundfactory__menu-navigate-03.wav').play()
                 self.game.gamestate = self.__action
         else:
-            self.__surface = self.game.font.render(self.__text, False, self.__color1)
+            self.__surface = self.game.font.render(self.__text, False, self.__color)
             self.image = self.__surface
 
 class Title(Sprite):
