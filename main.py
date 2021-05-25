@@ -3,7 +3,6 @@ from save import save
 from load import load
 from gamestate import *
 from game import *
-from cryptography.fernet import Fernet
 import sys
 
 g = Game() # Skapar en instans av klassen spel. Detta är själva spelet.
